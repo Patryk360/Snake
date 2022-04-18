@@ -15,7 +15,7 @@ let xMinus = false;
 let yPlus = false;
 let yMinus = false;
 
-let turn;
+let turn = { x: 0, y: 0, up: false, down: false, left: false, right: false };
 
 let yFood = 0;
 let xFood = 0;
@@ -36,6 +36,11 @@ leaderboard.push({name: myName, point: 0});
 
 const leaderboardF = () => {
     let topHTML = "<tr><th>Name</th><th>Point</th></tr>";
+
+    leaderboard.sort((a, b) => {
+        return a.point - b.point;
+    });
+    leaderboard.reverse();
 
     for (const topName of leaderboard) {
         topHTML += `<tr><td>${topName.name}</td><td>${topName.point}</td></tr>`;
@@ -107,6 +112,7 @@ const start = () => {
         if (xMinus) x -= 26;
         if (yPlus) y += 26;
         if (yMinus) y -= 26;
+        console.log(turn);
     }, 500);
 }
 
@@ -118,6 +124,7 @@ const stop = () => {
     snakeLength = 1;
     point = 0;
     multiFood = false;
+    document.getElementById("point").innerHTML = point;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = 'green';
     ctx.fillRect(0, 0, 806, 806);
@@ -140,24 +147,56 @@ document.addEventListener('keydown', (event) => {
             xMinus = false;
             yPlus = false;
             yMinus = true;
+
+            turn.x = 26+x;
+            turn.y = y;
+
+            turn.up = true;
+            turn.down = false;
+            turn.left = false;
+            turn.right = false;
         }
         if (name === "s") {
             xPlus = false;
             xMinus = false;
             yPlus = true;
             yMinus = false;
+
+            turn.x = 26+x;
+            turn.y = y;
+
+            turn.up = false;
+            turn.down = true;
+            turn.left = false;
+            turn.right = false;
         }
         if (name === "a") {
             xPlus = false;
             xMinus = true;
             yPlus = false;
             yMinus = false;
+
+            turn.x = 26+x;
+            turn.y = y;
+
+            turn.up = false;
+            turn.down = false;
+            turn.left = true;
+            turn.right = false;
         }
         if (name === "d") {
             xPlus = true;
             xMinus = false;
             yPlus = false;
             yMinus = false;
+
+            turn.x = 26+x;
+            turn.y = y;
+
+            turn.up = false;
+            turn.down = false;
+            turn.left = false;
+            turn.right = true;
         }
     }
 });
