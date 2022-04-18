@@ -15,13 +15,15 @@ let xMinus = false;
 let yPlus = false;
 let yMinus = false;
 
-let turn = { x: 0, y: 0, up: false, down: false, left: false, right: false };
+let turns = [];
 
 let yFood = 0;
 let xFood = 0;
 let snakeLength = 1;
 let point = 0;
 let multiFood = false;
+
+const eat = new Audio("./sound/food.mp3");
 
 const randomFood = [];
 
@@ -70,6 +72,7 @@ const snake = (x, y) => {
 
     if ((26+x == xFood)&&(0+y == yFood)) {
         snakeLength += 1;
+        eat.play();
         yFood = randomFood[Math.floor(Math.random()*randomFood.length)];
         xFood = randomFood[Math.floor(Math.random()*randomFood.length)];
 
@@ -112,7 +115,7 @@ const start = () => {
         if (xMinus) x -= 26;
         if (yPlus) y += 26;
         if (yMinus) y -= 26;
-        console.log(turn);
+        console.log(turns);
     }, 500);
 }
 
@@ -148,13 +151,7 @@ document.addEventListener('keydown', (event) => {
             yPlus = false;
             yMinus = true;
 
-            turn.x = 26+x;
-            turn.y = y;
-
-            turn.up = true;
-            turn.down = false;
-            turn.left = false;
-            turn.right = false;
+            turns.push({ x: 26+x, y: y, up: true, down: false, left: false, right: false });
         }
         if (name === "s") {
             xPlus = false;
@@ -162,13 +159,7 @@ document.addEventListener('keydown', (event) => {
             yPlus = true;
             yMinus = false;
 
-            turn.x = 26+x;
-            turn.y = y;
-
-            turn.up = false;
-            turn.down = true;
-            turn.left = false;
-            turn.right = false;
+            turns.push({ x: 26+x, y: y, up: false, down: true, left: false, right: false });
         }
         if (name === "a") {
             xPlus = false;
@@ -176,13 +167,7 @@ document.addEventListener('keydown', (event) => {
             yPlus = false;
             yMinus = false;
 
-            turn.x = 26+x;
-            turn.y = y;
-
-            turn.up = false;
-            turn.down = false;
-            turn.left = true;
-            turn.right = false;
+            turns.push({ x: 26+x, y: y, up: false, down: false, left: true, right: false });
         }
         if (name === "d") {
             xPlus = true;
@@ -190,13 +175,7 @@ document.addEventListener('keydown', (event) => {
             yPlus = false;
             yMinus = false;
 
-            turn.x = 26+x;
-            turn.y = y;
-
-            turn.up = false;
-            turn.down = false;
-            turn.left = false;
-            turn.right = true;
+            turns.push({ x: 26+x, y: y, up: false, down: false, left: false, right: true });
         }
     }
 });
