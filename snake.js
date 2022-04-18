@@ -15,6 +15,8 @@ let xMinus = false;
 let yPlus = false;
 let yMinus = false;
 
+let head = {};
+let parts = [];
 let turns = [];
 
 let yFood = 0;
@@ -59,16 +61,21 @@ const snake = (x, y) => {
     ctx.fillStyle = 'green';
     ctx.fillRect(0, 0, 806, 806);
 
+    parts = [];
+
+    ctx.fillStyle = 'red';
+    ctx.fillRect(26+x, 0+y, 20, 20);
+
+    head = {x: 26+x, y: 0+y};
+
     for (let i = 0; i<snakeLength; i++) {
         ctx.fillStyle = 'black';
         ctx.fillRect((0+x)-(26*i), 0+y, 20, 20);
+        parts.push({x: (0+x)-(26*i), y: 0+y});
     }
 
     ctx.fillStyle = 'yellow';
     ctx.fillRect(xFood, yFood, 20, 20);
-
-    ctx.fillStyle = 'red';
-    ctx.fillRect(26+x, 0+y, 20, 20);
 
     if ((26+x == xFood)&&(0+y == yFood)) {
         snakeLength += 1;
@@ -90,15 +97,22 @@ const snake = (x, y) => {
 
         ctx.fillStyle = 'green';
         ctx.fillRect(0, 0, 806, 806);
+
+        parts = [];
+
+        ctx.fillStyle = 'red';
+        ctx.fillRect(26+x, 0+y, 20, 20);
+
+        head = {x: 26+x, y: 0+y};
     
-        ctx.fillStyle = 'black';
-        ctx.fillRect(0+x, 0+y, 20, 20);
+        for (let i = 0; i<snakeLength; i++) {
+            ctx.fillStyle = 'black';
+            ctx.fillRect((0+x)-(26*i), 0+y, 20, 20);
+            parts.push({x: (0+x)-(26*i), y: 0+y});
+        }
     
         ctx.fillStyle = 'yellow';
         ctx.fillRect(xFood, yFood, 20, 20);
-    
-        ctx.fillStyle = 'red';
-        ctx.fillRect(26+x, 0+y, 20, 20);
     }
 }
 
@@ -110,12 +124,13 @@ const start = () => {
     interval = setInterval(() => {
         if (x > 806) x = 0;
         if (y > 806) y = 0;
+        if (x < 0) x = 0;
         snake(x, y);
         if (xPlus) x += 26;
         if (xMinus) x -= 26;
         if (yPlus) y += 26;
         if (yMinus) y -= 26;
-        console.log(turns);
+        console.log(parts);
     }, 500);
 }
 
