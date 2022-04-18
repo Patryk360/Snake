@@ -8,6 +8,14 @@
     <div class="centerDiv">
         <h3 id="point">0</h3>
     </div>
+    <div class="topDiv">
+        <table id="leaderboard"></table>
+        <form id="form">
+            <label for="name">Name:</label><br>
+            <input type="text" id="name" name="name" value=""><br>
+        </form>
+        <button onclick="changeName()">OK</button>
+    </div>
     <canvas id="snake" class="center" width="800" height="800"></canvas>
     <script src="snake.js"></script>
     <button class="center" onclick="start()">Start</button>

@@ -6,3 +6,9 @@
 .centerDiv {
     text-align: center;
 }
+.topDiv {
+    position: absolute;
+}
+table, th, td {
+    border:1px solid black;
+}

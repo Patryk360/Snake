@@ -3,6 +3,9 @@ const ctx = canvas.getContext('2d');
 ctx.fillStyle = 'green';
 ctx.fillRect(0, 0, 806, 806);
 
+let leaderboard = [];
+
+let myName = "Patryk";
 let started = false;
 let interval;
 let x = 0;
@@ -27,6 +30,21 @@ while (i < 780) {
     i += 26;
     randomFood.push(i);
 }
+
+document.getElementById("name").value = myName;
+leaderboard.push({name: myName, point: 0});
+
+const leaderboardF = () => {
+    let topHTML = "<tr><th>Name</th><th>Point</th></tr>";
+
+    for (const topName of leaderboard) {
+        topHTML += `<tr><td>${topName.name}</td><td>${topName.point}</td></tr>`;
+    }
+
+    document.getElementById("leaderboard").innerHTML = topHTML;
+}
+
+leaderboardF();
 
 const snake = (x, y) => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -55,6 +73,10 @@ const snake = (x, y) => {
         if (snakeLength == 5) multiFood = true;
 
         document.getElementById("point").innerHTML = point;
+        const leader = leaderboard.find(a => a.name == myName);
+        leader.point += 10;
+        if (multiFood) leader.point += 20;
+        leaderboardF();
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -93,9 +115,21 @@ const stop = () => {
     clearInterval(interval);
     x = 0;
     y = 0;
+    snakeLength = 1;
+    point = 0;
+    multiFood = false;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = 'green';
     ctx.fillRect(0, 0, 806, 806);
+}
+
+const changeName = () => {
+    const nameValue = document.getElementById("name").value;
+    myName = nameValue;
+    const leader = leaderboard.find(a => a.name == myName);
+    if (!leader) leaderboard.push({name: myName, point: 0});
+    document.getElementById("point").innerHTML = point;
+    leaderboardF();
 }
 
 document.addEventListener('keydown', (event) => {
