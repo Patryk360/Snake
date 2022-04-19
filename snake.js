@@ -5,6 +5,7 @@ ctx.fillRect(0, 0, 806, 806);
 
 let leaderboard = [];
 
+let fps = 2;
 let myName = "Patryk";
 let started = false;
 let interval;
@@ -122,16 +123,17 @@ const start = () => {
     yFood = randomFood[Math.floor(Math.random()*randomFood.length)];
     xFood = randomFood[Math.floor(Math.random()*randomFood.length)];
     interval = setInterval(() => {
-        if (x > 806) x = 0;
-        if (y > 806) y = 0;
-        if (x < 0) x = 0;
+        if (x > 780) x = 0;
+        if (y > 780) y = 0;
+        if (x < 0) x = 780;
+        if (y < 0) y = 780;
         snake(x, y);
         if (xPlus) x += 26;
         if (xMinus) x -= 26;
         if (yPlus) y += 26;
         if (yMinus) y -= 26;
         console.log(parts);
-    }, 500);
+    }, 1000/fps);
 }
 
 const stop = () => {
