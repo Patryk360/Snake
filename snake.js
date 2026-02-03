@@ -1,198 +1,144 @@
 const canvas = document.getElementById('snake');
 const ctx = canvas.getContext('2d');
-ctx.fillStyle = 'green';
-ctx.fillRect(0, 0, 806, 806);
 
-let leaderboard = [];
+const grid = 26;
+const snakeSize = 20;
 
-let fps = 2;
+let fps = 5;
 let myName = "Patryk";
 let started = false;
 let interval;
-let x = 0;
-let y = 0;
-let xPlus = true;
-let xMinus = false;
-let yPlus = false;
-let yMinus = false;
 
-let head = {};
-let parts = [];
-let turns = [];
+let direction = 'right';
+let nextDirection = 'right';
 
-let yFood = 0;
-let xFood = 0;
+let snake = [{x: 0, y: 0}];
 let snakeLength = 1;
-let point = 0;
+
+let xFood = 0;
+let yFood = 0;
 let multiFood = false;
+
+let point = 0;
+let leaderboard = [];
+leaderboard.push({name: myName, point: 0});
 
 const eat = new Audio("./sound/food.mp3");
 
-const randomFood = [];
-
-let i = 0;
-while (i < 780) {
-    i += 26;
-    randomFood.push(i);
-}
-
-document.getElementById("name").value = myName;
-leaderboard.push({name: myName, point: 0});
-
 const leaderboardF = () => {
     let topHTML = "<tr><th>Name</th><th>Point</th></tr>";
-
-    leaderboard.sort((a, b) => {
-        return a.point - b.point;
-    });
-    leaderboard.reverse();
-
-    for (const topName of leaderboard) {
-        topHTML += `<tr><td>${topName.name}</td><td>${topName.point}</td></tr>`;
+    leaderboard.sort((a,b)=> b.point - a.point);
+    for(const player of leaderboard){
+        topHTML += `<tr><td>${player.name}</td><td>${player.point}</td></tr>`;
     }
-
     document.getElementById("leaderboard").innerHTML = topHTML;
 }
-
 leaderboardF();
 
-const snake = (x, y) => {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    ctx.fillStyle = 'green';
-    ctx.fillRect(0, 0, 806, 806);
-
-    parts = [];
-
-    ctx.fillStyle = 'red';
-    ctx.fillRect(26+x, 0+y, 20, 20);
-
-    head = {x: 26+x, y: 0+y};
-
-    for (let i = 0; i<snakeLength; i++) {
-        ctx.fillStyle = 'black';
-        ctx.fillRect((0+x)-(26*i), 0+y, 20, 20);
-        parts.push({x: (0+x)-(26*i), y: 0+y});
+const randomFoodPos = () => {
+    const max = Math.floor(canvas.width / grid) - 1;
+    xFood = Math.floor(Math.random() * max) * grid;
+    yFood = Math.floor(Math.random() * max) * grid;
+    for(const part of snake){
+        if(part.x === xFood && part.y === yFood){
+            randomFoodPos();
+            break;
+        }
     }
+}
+
+const draw = () => {
+    ctx.fillStyle = 'green';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.fillStyle = 'yellow';
-    ctx.fillRect(xFood, yFood, 20, 20);
+    ctx.fillRect(xFood, yFood, grid, grid);
 
-    if ((26+x == xFood)&&(0+y == yFood)) {
-        snakeLength += 1;
+    snake.forEach((part, i) => {
+        ctx.fillStyle = i === 0 ? 'red' : 'black';
+        ctx.fillRect(part.x, part.y, grid, grid);
+    });
+}
+
+const moveSnake = () => {
+    if(!started) return;
+    direction = nextDirection;
+    let head = {...snake[0]};
+    if(direction==='right') head.x += grid;
+    if(direction==='left') head.x -= grid;
+    if(direction==='up') head.y -= grid;
+    if(direction==='down') head.y += grid;
+    if(head.x >= canvas.width) head.x = 0;
+    if(head.x < 0) head.x = canvas.width - grid;
+    if(head.y >= canvas.height) head.y = 0;
+    if(head.y < 0) head.y = canvas.height - grid;
+    snake.unshift(head);
+    if(head.x === xFood && head.y === yFood){
+        snakeLength++;
+        point += multiFood ? 30 : 10;
         eat.play();
-        yFood = randomFood[Math.floor(Math.random()*randomFood.length)];
-        xFood = randomFood[Math.floor(Math.random()*randomFood.length)];
-
-        point += 10;
-        if (multiFood) point += 20;
-        if (snakeLength == 5) multiFood = true;
-
-        document.getElementById("point").innerHTML = point;
         const leader = leaderboard.find(a => a.name == myName);
-        leader.point += 10;
-        if (multiFood) leader.point += 20;
+        if(leader) leader.point += multiFood ? 30 : 10;
+        if(snakeLength === 5) multiFood = true;
+        document.getElementById("point").innerText = point;
         leaderboardF();
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        ctx.fillStyle = 'green';
-        ctx.fillRect(0, 0, 806, 806);
-
-        parts = [];
-
-        ctx.fillStyle = 'red';
-        ctx.fillRect(26+x, 0+y, 20, 20);
-
-        head = {x: 26+x, y: 0+y};
-    
-        for (let i = 0; i<snakeLength; i++) {
-            ctx.fillStyle = 'black';
-            ctx.fillRect((0+x)-(26*i), 0+y, 20, 20);
-            parts.push({x: (0+x)-(26*i), y: 0+y});
-        }
-    
-        ctx.fillStyle = 'yellow';
-        ctx.fillRect(xFood, yFood, 20, 20);
+        randomFoodPos();
     }
+    while(snake.length > snakeLength){
+        snake.pop();
+    }
+    for(let i=1;i<snake.length;i++){
+        if(head.x === snake[i].x && head.y === snake[i].y){
+            stop();
+            alert("Game Over!");
+            return;
+        }
+    }
+    draw();
 }
 
 const start = () => {
-    if (started) return;
+    if(started) return;
     started = true;
-    yFood = randomFood[Math.floor(Math.random()*randomFood.length)];
-    xFood = randomFood[Math.floor(Math.random()*randomFood.length)];
-    interval = setInterval(() => {
-        if (x > 780) x = 0;
-        if (y > 780) y = 0;
-        if (x < 0) x = 780;
-        if (y < 0) y = 780;
-        snake(x, y);
-        if (xPlus) x += 26;
-        if (xMinus) x -= 26;
-        if (yPlus) y += 26;
-        if (yMinus) y -= 26;
-        console.log(parts);
-    }, 1000/fps);
+    snake = [{x: 0, y:0}];
+    snakeLength = 1;
+    point = 0;
+    multiFood = false;
+    direction = 'right';
+    nextDirection = 'right';
+    document.getElementById("point").innerText = point;
+    randomFoodPos();
+    interval = setInterval(moveSnake, 1000/fps);
 }
 
 const stop = () => {
     started = false;
     clearInterval(interval);
-    x = 0;
-    y = 0;
+    snake = [{x:0,y:0}];
     snakeLength = 1;
     point = 0;
     multiFood = false;
-    document.getElementById("point").innerHTML = point;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = 'green';
-    ctx.fillRect(0, 0, 806, 806);
+    document.getElementById("point").innerText = point;
+    draw();
 }
 
 const changeName = () => {
-    const nameValue = document.getElementById("name").value;
+    const nameValue = document.getElementById("name").value.trim();
+    if(nameValue === "") return;
     myName = nameValue;
-    const leader = leaderboard.find(a => a.name == myName);
-    if (!leader) leaderboard.push({name: myName, point: 0});
-    document.getElementById("point").innerHTML = point;
+    const leader = leaderboard.find(a=>a.name===myName);
+    if(!leader) leaderboard.push({name: myName, point: 0});
+    document.getElementById("point").innerText = point;
     leaderboardF();
 }
 
-document.addEventListener('keydown', (event) => {
-    const name = event.key;
-    if (started) {
-        if (name === "w") {
-            xPlus = false;
-            xMinus = false;
-            yPlus = false;
-            yMinus = true;
-
-            turns.push({ x: 26+x, y: y, up: true, down: false, left: false, right: false });
-        }
-        if (name === "s") {
-            xPlus = false;
-            xMinus = false;
-            yPlus = true;
-            yMinus = false;
-
-            turns.push({ x: 26+x, y: y, up: false, down: true, left: false, right: false });
-        }
-        if (name === "a") {
-            xPlus = false;
-            xMinus = true;
-            yPlus = false;
-            yMinus = false;
-
-            turns.push({ x: 26+x, y: y, up: false, down: false, left: true, right: false });
-        }
-        if (name === "d") {
-            xPlus = true;
-            xMinus = false;
-            yPlus = false;
-            yMinus = false;
-
-            turns.push({ x: 26+x, y: y, up: false, down: false, left: false, right: true });
-        }
-    }
+document.addEventListener('keydown', (e) => {
+    const key = e.key;
+    if(!started) return;
+    if(key==='w' && direction!=='down') nextDirection='up';
+    if(key==='s' && direction!=='up') nextDirection='down';
+    if(key==='a' && direction!=='right') nextDirection='left';
+    if(key==='d' && direction!=='left') nextDirection='right';
 });
+
+draw();
